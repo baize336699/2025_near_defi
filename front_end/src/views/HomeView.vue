@@ -26,7 +26,7 @@ const handleSearchQueryUpdate = async (newQuery: string) => {
 
   try {
     // 安全警告：实际开发中应通过后端调用，避免暴露API Key
-    const apiKey = '' // 从环境变量获取（后端方案）
+    const apiKey = process.env.OPENAI_API_KEY;// 从环境变量获取（后端方案）
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
