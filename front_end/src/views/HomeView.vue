@@ -1,42 +1,6 @@
 <template>
   <div class="home-container">
-    <!-- 左侧内容 -->
-    <div class="left-panel">
-      <h2 class="title">{{ title }}</h2>
-      <p class="description">{{ description }}</p>
-      <el-input
-        v-model="postContent"
-        type="textarea"
-        :rows="10"
-        placeholder="Write your blog post here..."
-      />
-    </div>
-
-    <!-- 右侧聊天界面 -->
-    <div class="right-panel">
-      <div class="chat-messages">
-        <ChatMessage
-          v-for="(msg, index) in messages"
-          :key="index"
-          :message="msg"
-          :is-user="msg.role === 'user'"
-        />
-      </div>
-      
-      <div class="chat-input">
-        <el-input
-          v-model="newMessage"
-          placeholder="Type your message..."
-          @keyup.enter="sendMessage"
-        >
-          <template #append>
-            <el-button @click="sendMessage">
-              <el-icon><Promotion /></el-icon>
-            </el-button>
-          </template>
-        </el-input>
-      </div>
-    </div>
+    <startCreat @updateSearchQuery="handleSearchQueryUpdate" />
   </div>
 </template>
 
@@ -44,6 +8,7 @@
 import { ref } from 'vue'
 import ChatMessage from '@/components/ChatMessage.vue'
 import { Promotion } from '@element-plus/icons-vue'
+import startCreat from './subHomeView/startCreat.vue'
 
 const title = 'The Future of Artificial Intelligence'
 const description = `Artificial Intelligence has become an integral part of our daily lives...`
@@ -52,33 +17,60 @@ const messages = ref([
   { role: 'ai', content: 'How can I assist you today?' }
 ])
 const newMessage = ref('')
-const postContent = ref('')
+const article = ref('')
 
-const sendMessage = () => {
-  if (!newMessage.value.trim()) return
-  
-  messages.value.push({
-    role: 'user',
-    content: newMessage.value
-  })
-  
-  // 模拟AI回复
-  setTimeout(() => {
-    messages.value.push({
-      role: 'ai',
-      content: 'This is a sample response from AI...'
+const handleSearchQueryUpdate = async (newQuery: string) => {
+  console.log("newQuery", newQuery)
+
+  const prompt = `请根据关键词 "${newQuery}" 写一篇高质量的文章。`
+
+  try {
+    // 安全警告：实际开发中应通过后端调用，避免暴露API Key
+    const apiKey = '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' // 从环境变量获取（后端方案）
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-3.5-turbo', // 确保使用可用模型
+        messages: [
+          { role: 'system', content: 'You are a helpful assistant.' },
+          { role: 'user', content: prompt }
+        ],
+        max_tokens: 500,
+        temperature: 0.7
+      })
     })
-  }, 1000)
-  
-  newMessage.value = ''
+
+    const data = await response.json()
+    if (!response.ok) {
+      const errorMessage = data.error?.message || '未知错误'
+      throw new Error(`API 请求失败：${errorMessage}`)
+    }
+
+    // 修正响应内容提取路径
+    const content = data.choices[0]?.message?.content
+    if (!content) throw new Error('未获取到有效内容')
+
+    article.value = content.trim()
+    console.log("生成内容：", article.value)
+  } catch (error) {
+    console.error('生成文章失败：', error)
+    article.value = `生成失败：${error.message}`
+  }
+  return
 }
 </script>
 
 <style scoped>
 .home-container {
   display: flex;
-  height: 100%;
+  height: 90%;
   gap: 2rem;
+  /*   border: 1px solid gray; */
+  padding: 15px
 }
 
 .left-panel {
@@ -86,6 +78,7 @@ const sendMessage = () => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  background-color: white;
 }
 
 .right-panel {
@@ -94,6 +87,7 @@ const sendMessage = () => {
   flex-direction: column;
   border-left: 1px solid #eee;
   padding-left: 1rem;
+  background-color: white;
 }
 
 .chat-messages {

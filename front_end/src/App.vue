@@ -17,8 +17,8 @@
         <el-icon>
           <Bell />
         </el-icon>
-        <el-button color="#626aef" @click="connectWallet">Connect</el-button>
-        <el-avatar :size="30" v-if="walletAddress" src="./assets/avatar.png" />
+        <el-button v-if="!isConnected" color="#626aef" @click="connectWallet">Connect</el-button>
+        <el-avatar :size="30" v-else src="./assets/avatar.png" />
       </div>
     </header>
 
@@ -29,7 +29,7 @@
           <el-icon>
             <Expand />
           </el-icon>
-          <template #title></template>
+          <template #title>Expand</template>
         </el-menu-item>
 
         <el-menu-item index="/">
@@ -54,8 +54,10 @@
         </el-menu-item>
 
         <el-menu-item index="/analytics" class="bottom-item">
-          <img src="./assets/logo.png" class="logo" />
-          <template #title>Analytics</template>
+          <el-button v-if="!isConnected" color="#626aef" @click="connectWallet">Connect wallet</el-button>
+
+          <img v-if="isConnected" src="./assets/logo.png" class="logo" />
+          <template v-if="isConnected" #title>Analytics</template>
         </el-menu-item>
       </el-menu>
 
@@ -141,6 +143,8 @@ const connectWallet = async () => {
     if (accounts.length > 0) {
       account.value = accounts[0]
       isConnected.value = true
+
+      console.log("account", account)
       await fetchWalletInfo()
     }
   } catch (error) {
@@ -292,6 +296,7 @@ const shortenAddress = (address: string) => {
   flex: 1;
   padding: 20px;
   overflow-y: auto;
+  background-color: #f9fafb;
 }
 
 .el-menu-item {
