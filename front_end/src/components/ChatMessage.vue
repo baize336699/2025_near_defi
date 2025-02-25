@@ -1,24 +1,32 @@
 <template>
   <div :class="['message', isUser ? 'user' : 'ai']">
     <el-avatar :src="avatarUrl" size="small" />
-    <div class="content">
+    <div class="content" @click="onClickContent">
       {{ message.content }}
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, toRefs } from 'vue'
+import { computed, defineComponent, toRefs } from 'vue'
+const emit = defineEmits<{
+  (e: 'onClickContent', searchQuery: string): void;
+}>()
 
 const props = defineProps({
   message: { type: Object, required: true },
   isUser: { type: Boolean, default: false }
 })
 
+const onClickContent = () => {
+  // Emit the content to the parent when clicked
+  emit('onClickContent', props.message.content);
+};
+
 // 使用 toRefs 解构保持响应性
 const { isUser } = toRefs(props)
 
-const avatarUrl = computed(() => 
+const avatarUrl = computed(() =>
   isUser.value ? './assets/user-avatar.png' : './assets/ai-avatar.png'
 )
 </script>

@@ -1,6 +1,9 @@
 <template>
   <div class="home-container">
-    <startCreat @updateSearchQuery="handleSearchQueryUpdate" />
+    <startCreat v-if="page == 1" @updateSearchQuery="handleSearchQueryUpdate" />
+
+    <editContent :concent="concent" @updateSearchQuery="handleSearchQueryUpdate" :userInput="userInput"
+      v-if="page == 2" />
   </div>
 </template>
 
@@ -9,6 +12,7 @@ import { ref } from 'vue'
 import ChatMessage from '@/components/ChatMessage.vue'
 import { Promotion } from '@element-plus/icons-vue'
 import startCreat from './subHomeView/startCreat.vue'
+import editContent from './subHomeView/editContent.vue'
 
 const title = 'The Future of Artificial Intelligence'
 const description = `Artificial Intelligence has become an integral part of our daily lives...`
@@ -16,58 +20,47 @@ const description = `Artificial Intelligence has become an integral part of our 
 const messages = ref([
   { role: 'ai', content: 'How can I assist you today?' }
 ])
-const newMessage = ref('')
-const article = ref('')
+const userInput = ref('')
+const concent = ref('')
+const page = ref(1)
 
 const handleSearchQueryUpdate = async (newQuery: string) => {
+  userInput.value = newQuery
   console.log("newQuery", newQuery)
 
-  const prompt = `请根据关键词 "${newQuery}" 写一篇高质量的文章。`
+  const prompt = `请根据关键词"${newQuery}"写一篇高质量的文章。`
 
   try {
     // 安全警告：实际开发中应通过后端调用，避免暴露API Key
-    const apiKey = process.env.OPENAI_API_KEY;// 从环境变量获取（后端方案）
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const apiKey = import.meta.env.VITE_API_KEY; // 从环境变量获取（后端方案）
+    const response = await fetch('https://api.055ai.cn/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-3.5-turbo', // 确保使用可用模型
-        messages: [
-          { role: 'system', content: 'You are a helpful assistant.' },
-          { role: 'user', content: prompt }
-        ],
-        max_tokens: 500,
-        temperature: 0.7
-      })
+        model: "deepseek-ai/DeepSeek-V3",
+        messages: [{ role: "user", content: prompt }],
+      }),
     })
 
-    const data = await response.json()
-    if (!response.ok) {
-      const errorMessage = data.error?.message || '未知错误'
-      throw new Error(`API 请求失败：${errorMessage}`)
-    }
+    const data = await response.json();
+    page.value = 2
+    concent.value = data.choices?.[0]?.message?.content || "No response";
 
-    // 修正响应内容提取路径
-    const content = data.choices[0]?.message?.content
-    if (!content) throw new Error('未获取到有效内容')
-
-    article.value = content.trim()
-    console.log("生成内容：", article.value)
+    /*     return data.choices?.[0]?.message?.content || "No response"; */
   } catch (error) {
-    console.error('生成文章失败：', error)
-    article.value = `生成失败：${error.message}`
+    console.error("Error:", error);
+    return "Error occurred, please try again.";
   }
-  return
 }
 </script>
 
 <style scoped>
 .home-container {
   display: flex;
-  height: 90%;
+  height: 100%;
   gap: 2rem;
   /*   border: 1px solid gray; */
   padding: 15px
