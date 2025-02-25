@@ -8,7 +8,23 @@
       <!--       <el-input v-model="postContent" type="textarea" :rows="10" placeholder="Write your blog post here..." /> -->
 
       <!--      <TinyMCEEditor v-model="postContent" /> -->
-      <TEditor v-model="postContent" ref="editorRef" />
+      <!--       <TEditor v-model="postContent" ref="editorRef" /> -->
+      <v-md-editor v-model="postContent" height="400px"></v-md-editor>
+
+      <div class="botton_box">
+        <el-button color="#626aef">
+          <el-icon :size="20" color="" class="icon_icon">
+            <Checked />
+          </el-icon>
+          Save Draft
+        </el-button>
+        <el-button color="#626aef">
+          <el-icon :size="20" class="icon_icon">
+            <UploadFilled />
+          </el-icon>
+          Mint & Publish
+        </el-button>
+      </div>
     </div>
 
     <!-- 右侧聊天界面 -->
@@ -100,10 +116,10 @@ const sendMessage = () => {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .home-container {
   display: flex;
-  height: 100%;
+  height: 90%;
   gap: 2rem;
   /*   border: 1px solid gray; */
   padding: 15px
@@ -115,6 +131,15 @@ const sendMessage = () => {
   flex-direction: column;
   gap: 1rem;
   background-color: white;
+
+  .botton_box {
+    display: flex;
+    justify-content: flex-end;
+
+    .icon_icon {
+      margin-right: 10px;
+    }
+  }
 }
 
 .right-panel {

@@ -60,7 +60,7 @@ const handleSearchQueryUpdate = async (newQuery: string) => {
 <style scoped>
 .home-container {
   display: flex;
-  height: 100%;
+  height: 90%;
   gap: 2rem;
   /*   border: 1px solid gray; */
   padding: 15px
